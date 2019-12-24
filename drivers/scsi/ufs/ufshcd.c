@@ -843,13 +843,41 @@ static void ufshcd_add_tm_upiu_trace(struct ufs_hba *hba, unsigned int tag,
 static inline void ufshcd_add_command_trace(struct ufs_hba *hba,
 			struct ufshcd_cmd_log_entry *entry)
 {
-	if (trace_ufshcd_command_enabled()) {
-		u32 intr = ufshcd_readl(hba, REG_INTERRUPT_STATUS);
+	sector_t lba = -1;
+	u8 opcode = 0;
+	u32 intr, doorbell;
+	struct ufshcd_lrb *lrbp = &hba->lrb[tag];
+	struct scsi_cmnd *cmd = lrbp->cmd;
+	int transfer_len = -1;
 
-		trace_ufshcd_command(dev_name(hba->dev), entry->str, entry->tag,
-				     entry->doorbell, entry->transfer_len, intr,
-				     entry->lba, entry->cmd_id);
+	if (!trace_ufshcd_command_enabled()) {
+		/* trace UPIU W/O tracing command */
+		if (cmd)
+			ufshcd_add_cmd_upiu_trace(hba, tag, str);
+		return;
 	}
+
+	if (cmd) { /* data phase exists */
+		/* trace UPIU also */
+		ufshcd_add_cmd_upiu_trace(hba, tag, str);
+		opcode = cmd->cmnd[0];
+		if ((opcode == READ_10) || (opcode == WRITE_10)) {
+			/*
+			 * Currently we only fully trace read(10) and write(10)
+			 * commands
+			 */
+			if (cmd->request && cmd->request->bio)
+				lba = cmd->request->bio->bi_iter.bi_sector;
+			transfer_len = be32_to_cpu(
+				lrbp->ucd_req_ptr->sc.exp_data_transfer_len);
+		}
+	}
+
+	intr = ufshcd_readl(hba, REG_INTERRUPT_STATUS);
+	doorbell = ufshcd_readl(hba, REG_UTP_TRANSFER_REQ_DOOR_BELL);
+        trace_ufshcd_command(dev_name(hba->dev), entry->str, entry->tag,
+                                     entry->doorbell, entry->transfer_len, intr,
+                                     entry->lba, entry->cmd_id);
 }
 #else
 static inline void ufshcd_add_command_trace(struct ufs_hba *hba,
@@ -857,6 +885,7 @@ static inline void ufshcd_add_command_trace(struct ufs_hba *hba,
 {
 }
 #endif
+
 
 #ifdef CONFIG_SCSI_UFSHCD_CMD_LOGGING
 static void ufshcd_cmd_log_init(struct ufs_hba *hba)
