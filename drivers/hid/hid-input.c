@@ -1125,6 +1125,7 @@ static void hidinput_configure_usage(struct hid_input *hidinput, struct hid_fiel
 	}
 
 mapped:
+	/* Mapping failed, bail out */
 	if (!bit)
 		return;
 
