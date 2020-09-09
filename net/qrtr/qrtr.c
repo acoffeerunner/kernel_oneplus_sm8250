@@ -530,21 +530,20 @@ static int qrtr_node_enqueue(struct qrtr_node *node, struct sk_buff *skb,
 			     struct sockaddr_qrtr *to, unsigned int flags)
 {
 	struct qrtr_hdr_v1 *hdr;
-	int confirm_rx;
 	size_t len = skb->len;
-	int rc = -ENODEV;
+	int rc;
 
-	if (!atomic_read(&node->hello_sent) && type != QRTR_TYPE_HELLO) {
+/*	if (!atomic_read(&node->hello_sent) && type != QRTR_TYPE_HELLO) {
 		kfree_skb(skb);
 		return rc;
 	}
 	if (atomic_read(&node->hello_sent) && type == QRTR_TYPE_HELLO) {
 		kfree_skb(skb);
 		return 0;
-	}
+	}  */
 
 	/* If sk is null, this is a forwarded packet and should not wait */
-	if (!skb->sk) {
+/*	if (!skb->sk) {
 		struct qrtr_cb *cb = (struct qrtr_cb *)skb->cb;
 
 		confirm_rx = cb->confirm_rx;
@@ -554,25 +553,27 @@ static int qrtr_node_enqueue(struct qrtr_node *node, struct sk_buff *skb,
 			kfree_skb(skb);
 			return confirm_rx;
 		}
-	}
+	}  */
 
 	hdr = skb_push(skb, sizeof(*hdr));
 	hdr->version = cpu_to_le32(QRTR_PROTO_VER_1);
 	hdr->type = cpu_to_le32(type);
 	hdr->src_node_id = cpu_to_le32(from->sq_node);
 	hdr->src_port_id = cpu_to_le32(from->sq_port);
-	if (to->sq_node == QRTR_NODE_BCAST)
+	if (to->sq_node == QRTR_NODE_BCAST) {
 		hdr->dst_node_id = cpu_to_le32(node->nid);
-	else
+		hdr->dst_port_id = cpu_to_le32(QRTR_NODE_BCAST);
+	} else {
 		hdr->dst_node_id = cpu_to_le32(to->sq_node);
-
-	hdr->dst_port_id = cpu_to_le32(to->sq_port);
+		hdr->dst_port_id = cpu_to_le32(to->sq_port);
+	}
 	hdr->size = cpu_to_le32(len);
-	hdr->confirm_rx = !!confirm_rx;
+	hdr->confirm_rx = 0;
 
 	qrtr_log_tx_msg(node, hdr, skb);
 	rc = skb_put_padto(skb, ALIGN(len, 4) + sizeof(*hdr));
-	if (rc) {
+
+/*	if (rc) {
 		pr_err("%s: failed to pad size %lu to %lu rc:%d\n", __func__,
 		       len, ALIGN(len, 4) + sizeof(*hdr), rc);
 		return rc;
@@ -597,8 +598,17 @@ static int qrtr_node_enqueue(struct qrtr_node *node, struct sk_buff *skb,
 		if (flow)
 			atomic_dec(&flow->pending);
 		mutex_unlock(&node->qrtr_tx_lock);
-	}
+	} */
 
+	if (!rc) {
+		mutex_lock(&node->ep_lock);
+		rc = -ENODEV;
+		if (node->ep)
+			rc = node->ep->xmit(node->ep, skb);
+		else
+			kfree_skb(skb);
+		mutex_unlock(&node->ep_lock);
+	}
 	return rc;
 }
 
