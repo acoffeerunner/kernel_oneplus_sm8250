@@ -1750,7 +1750,6 @@ static __always_inline void delayed_free_task(struct task_struct *tsk)
 	else
 		free_task(tsk);
 }
-
 static int pidfd_release(struct inode *inode, struct file *file)
 {
 	struct pid *pid = file->private_data;
@@ -2362,7 +2361,6 @@ static __latent_entropy struct task_struct *copy_process(
 #endif
 	}
 #endif
-
 	copy_oom_score_adj(clone_flags, p);
 
 	return p;
