@@ -263,6 +263,7 @@ EXPORT_SYMBOL(fscrypt_encrypt_block_inplace);
  * This is for use by the filesystem's ->readpages() method.
  *
  * Return: 0 on success; -errno on failure
+ *
  */
 int fscrypt_decrypt_pagecache_blocks(struct page *page, unsigned int len,
 				     unsigned int offs)
