@@ -1514,14 +1514,9 @@ static int __dwc3_gadget_kick_transfer(struct dwc3_ep *dep)
 		}
 
 		dbg_event(0xFF, "GADGET_EP_CMD Failure", ret);
-		struct dwc3_request *tmp;
+		dwc3_stop_active_transfer(dwc, dep->number, true);
 
-		if (ret == -EAGAIN)
-			return ret;
-
-		dwc3_stop_active_transfer(dep, true, true);
-
-		list_for_each_entry_safe(req, tmp, &dep->started_list, list);
+		list_for_each_entry_safe(req, n, &dep->started_list, list)
 			dwc3_gadget_move_cancelled_request(req);
 
 		/* If ep isn't started, then there's no end transfer pending */
