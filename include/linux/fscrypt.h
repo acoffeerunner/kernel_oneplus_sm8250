@@ -18,6 +18,11 @@
 #include <linux/slab.h>
 #include <uapi/linux/fscrypt.h>
 
+static inline bool fscrypt_is_nokey_name(const struct dentry *dentry)
+{
+        return false;
+}
+
 #define FS_CRYPTO_BLOCK_SIZE		16
 
 struct fscrypt_info;
