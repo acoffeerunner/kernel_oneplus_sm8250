@@ -22,11 +22,17 @@
 
 #else	/* __ASSEMBLER__ */
 
+/*
+TODO
+
 #ifdef CONFIG_LTO_CLANG
 #define __LSE_PREAMBLE	".arch_extension lse\n"
 #else
 #define __LSE_PREAMBLE
 #endif
+
+TODO
+*/
 
 /* Move the ll/sc atomics out-of-line */
 #define __LL_SC_INLINE		notrace
