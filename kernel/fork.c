@@ -104,7 +104,7 @@
 #ifdef CONFIG_IM
 #include <linux/oem/im.h>
 #endif
-
+#include <linux/simple_lmk.h>
 
 #include <asm/pgtable.h>
 #include <asm/pgalloc.h>
