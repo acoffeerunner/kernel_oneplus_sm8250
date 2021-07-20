@@ -1702,7 +1702,6 @@ ffs_fs_mount(struct file_system_type *t, int flags,
 	rv = mount_nodev(t, flags, &data, ffs_sb_fill);
 	if (IS_ERR(rv) && data.ffs_data)
 		ffs_data_put(data.ffs_data);
-
 	return rv;
 }
 
@@ -3931,7 +3930,6 @@ static int ffs_acquire_dev(const char *dev_name, struct ffs_data *ffs_data)
 	}
 
 	ffs_dev_unlock();
-
 	return ret;
 }
 
