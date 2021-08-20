@@ -1241,7 +1241,6 @@ static int sec_get_touch_points(void *chip_data, struct point_info *points, int 
 	event_buff = kzalloc(MAX_EVENT_COUNT*SEC_EVENT_BUFF_SIZE * (sizeof(uint8_t)), GFP_KERNEL);
 	if (!event_buff) {
 		TPD_INFO("event_buff kzalloc failed\n");
-		pm_qos_remove_request(&pm_qos_req_stp);
 		return -ENOMEM;
 	}
 	p_event_coord = (struct sec_event_coordinate *)chip_info->first_event;
