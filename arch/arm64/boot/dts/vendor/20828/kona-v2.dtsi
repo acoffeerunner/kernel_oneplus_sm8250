@@ -6,20 +6,32 @@
 	qcom,msm-id = <356 0x20000>;
 };
 
+&CPU0 {
+	dynamic-power-coefficient = <128>;
+};
+&CPU1 {
+	dynamic-power-coefficient = <128>;
+};
+&CPU2 {
+	dynamic-power-coefficient = <128>;
+};
+&CPU3 {
+	dynamic-power-coefficient = <128>;
+};
 &CPU4 {
-	dynamic-power-coefficient = <533>;
+	dynamic-power-coefficient = <324>;
 };
 
 &CPU5 {
-	dynamic-power-coefficient = <533>;
+	dynamic-power-coefficient = <324>;
 };
 
 &CPU6 {
-	dynamic-power-coefficient = <533>;
+	dynamic-power-coefficient = <324>;
 };
 
 &CPU7 {
-	dynamic-power-coefficient = <642>;
+	dynamic-power-coefficient = <390>;
 };
 
 &clock_camcc {
@@ -392,10 +404,6 @@
 	interrupt-names = "dcvsh0_int", "dcvsh1_int", "dcvsh2_int";
 
 	qcom,cpufreq-table-0 =
-			< 300000>,
-			< 403200>,
-			< 518400>,
-			< 614400>,
 			< 691200>,
 			< 787200>,
 			< 883200>,
